@@ -8,4 +8,3 @@ spring:
     password: oracle
 server:
   port: 8888
-

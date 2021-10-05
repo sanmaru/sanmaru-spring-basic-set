@@ -1,31 +1,49 @@
 package com.sanmaru.security;
 
+import com.sanmaru.ApplicationMain;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
+import org.springframework.security.provisioning.UserDetailsManager;
+
+import javax.sql.DataSource;
 
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
+    private static Logger logger = LoggerFactory.getLogger(WebSecurityConfig.class);
     //reference page https://docs.spring.io/spring-security/site/docs/current/reference/html5/#servlet-authentication-inmemory
+    //reference page https://docs.spring.io/spring-security/site/docs/current/reference/html5/#servlet-authentication-jdbc-datasource
+
     @Bean
-    public UserDetailsService users() {
-        //user/password
-        UserDetails user = User.builder()
-                .username("user")
-                .password("{bcrypt}$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmNSJZ.0FxO/BTk76klW")
-                .roles("USER")
-                .build();
-        //admin/password
-        UserDetails admin = User.builder()
-                .username("admin")
-                .password("{bcrypt}$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmNSJZ.0FxO/BTk76klW")
-                .roles("USER", "ADMIN")
-                .build();
-        return new InMemoryUserDetailsManager(user, admin);
+    UserDetailsManager users(DataSource dataSource) {
+
+        JdbcUserDetailsManager users = new JdbcUserDetailsManager(dataSource);
+
+        if(!users.userExists("user")){
+            UserDetails user = User.builder()
+                    .username("user")
+                    .password("{bcrypt}$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmNSJZ.0FxO/BTk76klW")
+                    .roles("USER")
+                    .build();
+            users.createUser(user);
+        }
+
+        if(!users.userExists("user")){
+            UserDetails admin = User.builder()
+                    .username("admin")
+                    .password("{bcrypt}$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmNSJZ.0FxO/BTk76klW")
+                    .roles("USER", "ADMIN")
+                    .build();
+            users.createUser(admin);
+        }
+
+        return users;
     }
+
 }
