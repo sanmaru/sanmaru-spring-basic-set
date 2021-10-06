@@ -1,5 +1,5 @@
 plugins {
-    id 'org.springframework.boot' version '2.5.1'
+    id 'org.springframework.boot' version '2.5.2'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'java'
 }
@@ -20,19 +20,27 @@ repositories {
 
 dependencies {
     //웹 기본 패키지
-    implementation 'org.springframework.boot:spring-boot-starter-web:2.5.1'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
 
     //DB 데이터 컨트롤
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa:2.5.1'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
     //Authentication을 위한 추가
-    implementation 'org.springframework.boot:spring-boot-starter-security:2.5.1'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.security.oauth:spring-security-oauth2:2.5.1.RELEASE'
-    implementation 'org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure:2.5.1'
+    implementation 'org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure:2.5.2'
 
+    //java-jwt를 위한 추가
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.2'
+
+    //jwt를 위한 추가
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.2',
+            // Uncomment the next line if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms:
+            //'org.bouncycastle:bcprov-jdk15on:1.60',
+            'io.jsonwebtoken:jjwt-jackson:0.11.2' // or 'io.jsonwebtoken:jjwt-gson:0.11.2' for gson
 
     compileOnly 'org.projectlombok:lombok'
-    developmentOnly 'org.springframework.boot:spring-boot-devtools:2.5.1'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools:2.5.2'
 
     //DB 접속을 위한 JDBC 추가
     runtimeOnly 'com.oracle.database.jdbc:ojdbc8'
