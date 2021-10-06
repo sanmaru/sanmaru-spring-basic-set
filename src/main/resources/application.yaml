@@ -8,3 +8,6 @@ spring:
     password: oracle
 server:
   port: 8888
+security-set:
+  public-key: public
+  private-key: private
