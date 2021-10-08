@@ -6,6 +6,13 @@ spring:
     url: jdbc:oracle:thin:@127.0.0.1:1521:XE
     username: sanmaru
     password: oracle
+  jpa:
+    hibernate:
+# 테이블 자동 생성을 위해 필요함
+      ddl-auto: create
+    generate-ddl: false
+    show-sql: true
+    database: oracle
 server:
   port: 8888
 security-set:

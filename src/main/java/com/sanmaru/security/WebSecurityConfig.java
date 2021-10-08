@@ -1,17 +1,15 @@
 package com.sanmaru.security;
 
+import com.sanmaru.controllers.LoginHistoryRepository;
+import com.sanmaru.entities.LoginHistory;
 import com.sanmaru.security.component.LoginSuccessHandler;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -21,7 +19,6 @@ import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
 
 import javax.sql.DataSource;
-import java.security.Key;
 
 @EnableWebSecurity
 @Configuration
@@ -33,6 +30,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     //reference page https://docs.spring.io/spring-security/site/docs/current/reference/html5/#servlet-authentication-jdbc-datasource
     @Value("${security-set.public-key}")
     private String publicKey;
+
+    @Bean
+    CommandLineRunner init(LoginHistoryRepository loginHistoryRepository){
+        return args -> loginHistoryRepository.save(
+                new LoginHistory("moni@chosunbiz.com", 12345L, 12345L));
+    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {

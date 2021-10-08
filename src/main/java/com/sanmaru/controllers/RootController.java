@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -12,6 +11,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class RootController {
 
     final static Logger log = LoggerFactory.getLogger(RootController.class);
+
+    private final LoginHistoryRepository loginHistoryRepository;
+
+    public RootController(LoginHistoryRepository loginHistoryRepository) {
+        this.loginHistoryRepository = loginHistoryRepository;
+    }
 
     @GetMapping("/")
     public String root () {
