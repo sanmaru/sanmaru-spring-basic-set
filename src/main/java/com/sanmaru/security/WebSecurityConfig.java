@@ -1,12 +1,18 @@
 package com.sanmaru.security;
 
+import com.sanmaru.security.component.LoginSuccessHandler;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.User;
@@ -18,6 +24,8 @@ import javax.sql.DataSource;
 import java.security.Key;
 
 @EnableWebSecurity
+@Configuration
+@ComponentScan(basePackages = "com.sanmaru.security")
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     final static Logger logger = LoggerFactory.getLogger(WebSecurityConfig.class);
@@ -26,19 +34,26 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Value("${security-set.public-key}")
     private String publicKey;
 
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http
+                .authorizeRequests()
+                .anyRequest()
+                .authenticated()
+                .and()
+                .formLogin()
+                .permitAll()
+                .successHandler( new LoginSuccessHandler() )
+                .and()
+                .sessionManagement().maximumSessions(1);
+
+    }
+
     @Bean
     UserDetailsManager users(DataSource dataSource) {
         logger.info("publicKey : " + publicKey);
         JdbcUserDetailsManager users = new JdbcUserDetailsManager(dataSource);
 
-        // We need a signing key, so we'll create one just for this example. Usually
-        // the key would be read from your application configuration instead.
-        Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-        String jws = Jwts.builder().setSubject("Joe").signWith(key).compact();
-
-
-
-        logger.info("==================    " + jws);
         if(!users.userExists("user")){
             UserDetails user = User.builder()
                     .username("user")
@@ -48,7 +63,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             users.createUser(user);
         }
 
-        if(!users.userExists("user")){
+        if(!users.userExists("admin")){
             UserDetails admin = User.builder()
                     .username("admin")
                     .password("{bcrypt}$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmNSJZ.0FxO/BTk76klW")
