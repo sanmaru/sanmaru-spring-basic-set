@@ -1,15 +1,16 @@
 package com.sanmaru.security;
 
-import com.sanmaru.repositories.LoginHistoryRepository;
-import com.sanmaru.entities.LoginHistory;
+import com.sanmaru.repositories.UserHistoryRepository;
 import com.sanmaru.security.component.LoginSuccessHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -17,7 +18,9 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
+import org.springframework.transaction.PlatformTransactionManager;
 
+import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import java.util.Date;
 
@@ -32,10 +35,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Value("${security-set.public-key}")
     private String publicKey;
 
+    @Autowired
+    UserHistoryRepository userHistoryRepository;
+
     @Bean
-    CommandLineRunner init(LoginHistoryRepository loginHistoryRepository){
-        return args -> loginHistoryRepository.save(
-                new LoginHistory("crateTableSample", new Date().getTime(), null));
+    public PlatformTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
+        JpaTransactionManager txManager = new JpaTransactionManager();
+        txManager.setEntityManagerFactory(entityManagerFactory);
+        return txManager;
     }
 
     @Override
@@ -47,7 +54,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .formLogin()
                 .permitAll()
-                .successHandler( new LoginSuccessHandler() )
+                .successHandler( new LoginSuccessHandler(userHistoryRepository) )
                 .and()
                 .sessionManagement().maximumSessions(1);
 
@@ -56,6 +63,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     UserDetailsManager users(DataSource dataSource) {
         logger.info("publicKey : " + publicKey);
+        logger.info("================= WebSecurityConfig : " + userHistoryRepository);
         JdbcUserDetailsManager users = new JdbcUserDetailsManager(dataSource);
 
         if(!users.userExists("user")){
@@ -78,5 +86,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
         return users;
     }
+
+
 
 }
