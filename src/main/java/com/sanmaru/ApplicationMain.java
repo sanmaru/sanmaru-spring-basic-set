@@ -13,7 +13,6 @@ public class ApplicationMain {
     public static void main(String[] args) {
         logger.info("==== logging Info Test =====");
         logger.debug("==== logging Debug Test =====");
-        System.out.println("========System.out Test ");
         SpringApplication.run(ApplicationMain.class, args);
 
     }

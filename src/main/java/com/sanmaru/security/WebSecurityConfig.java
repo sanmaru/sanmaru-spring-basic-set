@@ -1,6 +1,6 @@
 package com.sanmaru.security;
 
-import com.sanmaru.controllers.LoginHistoryRepository;
+import com.sanmaru.repositories.LoginHistoryRepository;
 import com.sanmaru.entities.LoginHistory;
 import com.sanmaru.security.component.LoginSuccessHandler;
 import org.slf4j.Logger;
@@ -19,6 +19,7 @@ import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
 
 import javax.sql.DataSource;
+import java.util.Date;
 
 @EnableWebSecurity
 @Configuration
@@ -34,7 +35,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     CommandLineRunner init(LoginHistoryRepository loginHistoryRepository){
         return args -> loginHistoryRepository.save(
-                new LoginHistory("moni@chosunbiz.com", 12345L, 12345L));
+                new LoginHistory("crateTableSample", new Date().getTime(), null));
     }
 
     @Override
