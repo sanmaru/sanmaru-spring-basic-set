@@ -12,24 +12,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class RootController {
 
-    final static Logger log = LoggerFactory.getLogger(RootController.class);
+    final static Logger logger = LoggerFactory.getLogger(RootController.class);
 
     @Autowired
     UserHistoryRepository userHistoryRepository;
 
     @GetMapping("/")
     public String root () {
-        log.info("======= info ");
-        log.debug("======= debug");
-        log.warn("===== warn");
-        log.error("===== error");
-        log.info("============= + Controller LoginHistoryRepo : "  + userHistoryRepository);
+
         //https://itstory.tk/entry/Spring-Security-%ED%98%84%EC%9E%AC-%EB%A1%9C%EA%B7%B8%EC%9D%B8%ED%95%9C-%EC%82%AC%EC%9A%A9%EC%9E%90-%EC%A0%95%EB%B3%B4-%EA%B0%80%EC%A0%B8%EC%98%A4%EA%B8%B0
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         UserDetails userDetails = (UserDetails) principal;
-        log.info("====Username : " + userDetails.getUsername());
-        log.info("====Authorities : " + userDetails.getAuthorities());
 
-        return "root1";
+        return "username : " + userDetails.getUsername()
+                + "<br/>Role : " + userDetails.getAuthorities()
+                + "<br/><a href='/logout'>logout</a>";
     }
 }

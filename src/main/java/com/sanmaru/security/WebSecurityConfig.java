@@ -6,9 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -22,18 +20,38 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
-import java.util.Date;
 
 @EnableWebSecurity
 @Configuration
-@ComponentScan(basePackages = "com.sanmaru.security")
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     final static Logger logger = LoggerFactory.getLogger(WebSecurityConfig.class);
+
     //reference page https://docs.spring.io/spring-security/site/docs/current/reference/html5/#servlet-authentication-inmemory
     //reference page https://docs.spring.io/spring-security/site/docs/current/reference/html5/#servlet-authentication-jdbc-datasource
     @Value("${security-set.public-key}")
     private String publicKey;
+
+    @Value("${security-set.token-name}")
+    private String tokenName;
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+
+        if(tokenName == null ) tokenName = "User_Token";
+        http.authorizeRequests()
+                .anyRequest()
+                .authenticated()
+                .and()
+                .formLogin()
+                .permitAll()
+                .successHandler( new LoginSuccessHandler(userHistoryRepository, tokenName) )
+                .and()
+                .sessionManagement().maximumSessions(1);
+        http.logout()
+                .deleteCookies("JSESSIONID")
+                .deleteCookies(tokenName);
+    }
 
     @Autowired
     UserHistoryRepository userHistoryRepository;
@@ -45,25 +63,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return txManager;
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http
-                .authorizeRequests()
-                .anyRequest()
-                .authenticated()
-                .and()
-                .formLogin()
-                .permitAll()
-                .successHandler( new LoginSuccessHandler(userHistoryRepository) )
-                .and()
-                .sessionManagement().maximumSessions(1);
-
-    }
-
     @Bean
     UserDetailsManager users(DataSource dataSource) {
-        logger.info("publicKey : " + publicKey);
-        logger.info("================= WebSecurityConfig : " + userHistoryRepository);
+
         JdbcUserDetailsManager users = new JdbcUserDetailsManager(dataSource);
 
         if(!users.userExists("user")){
@@ -83,10 +85,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                     .build();
             users.createUser(admin);
         }
-
         return users;
     }
-
 
 
 }

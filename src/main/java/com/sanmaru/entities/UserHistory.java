@@ -3,12 +3,12 @@ package com.sanmaru.entities;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.Columns;
 
 import javax.persistence.*;
 import javax.servlet.http.HttpServletRequest;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 @Entity
 public class UserHistory {
@@ -29,6 +29,9 @@ public class UserHistory {
     private String accessIP;
 
     @Getter @Setter
+    private String requestURI;
+
+    @Getter @Setter
     private String username;
 
     @Getter @Setter
@@ -37,12 +40,22 @@ public class UserHistory {
     @Getter @Setter
     private Long eventTime;
 
+    @Getter @Setter
+    private String eventTimeKr;
+
+    @Getter @Setter
+    private String userAgent;
+
     public UserHistory() {}
 
     public UserHistory(HttpServletRequest request, String userName, String eventName){
-        this.accessIP = request.getRemoteAddr();
+        Date now = new Date();
+        this.accessIP = request.getRemoteHost();
+        this.requestURI = request.getRequestURI();
+        this.userAgent = request.getHeader("user-agent");
         this.username = userName;
         this.eventName = eventName;
-        this.eventTime = new Date().getTime();
+        this.eventTime = now.getTime();
+        this.eventTimeKr = new SimpleDateFormat("yyyyMMddHHmmss", Locale.KOREA).format(now);
     }
 }

@@ -18,3 +18,4 @@ server:
 security-set:
   public-key: public
   private-key: private
+  token-name: Token
